@@ -1,20 +1,25 @@
 from http import HTTPStatus
-from typing import Any
+from typing import Any, cast
+from urllib.parse import quote
+from uuid import UUID
 
 import httpx
 
 from ... import errors
 from ...client import AuthenticatedClient, Client
-from ...models.problem import Problem
-from ...models.sales_inquiry_challenge_response_200 import SalesInquiryChallengeResponse200
+from ...models.tool_invocation_record import ToolInvocationRecord
 from ...types import Response
 
 
-def _get_kwargs() -> dict[str, Any]:
+def _get_kwargs(
+    id: UUID,
+) -> dict[str, Any]:
 
     _kwargs: dict[str, Any] = {
         "method": "get",
-        "url": "/v1/sales/inquiries/challenge",
+        "url": "/v1/tool-invocations/{id}".format(
+            id=quote(str(id), safe=""),
+        ),
     }
 
     return _kwargs
@@ -22,26 +27,23 @@ def _get_kwargs() -> dict[str, Any]:
 
 def _parse_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Problem | SalesInquiryChallengeResponse200 | None:
+) -> Any | ToolInvocationRecord | None:
     if response.status_code == 200:
-        response_200 = SalesInquiryChallengeResponse200.from_dict(response.json())
+        response_200 = ToolInvocationRecord.from_dict(response.json())
 
         return response_200
 
+    if response.status_code == 400:
+        response_400 = cast(Any, None)
+        return response_400
+
+    if response.status_code == 403:
+        response_403 = cast(Any, None)
+        return response_403
+
     if response.status_code == 404:
-        response_404 = Problem.from_dict(response.json())
-
+        response_404 = cast(Any, None)
         return response_404
-
-    if response.status_code == 429:
-        response_429 = Problem.from_dict(response.json())
-
-        return response_429
-
-    if response.status_code == 503:
-        response_503 = Problem.from_dict(response.json())
-
-        return response_503
 
     if client.raise_on_unexpected_status:
         raise errors.UnexpectedStatus(response.status_code, response.content)
@@ -51,7 +53,7 @@ def _parse_response(
 
 def _build_response(
     *, client: AuthenticatedClient | Client, response: httpx.Response
-) -> Response[Problem | SalesInquiryChallengeResponse200]:
+) -> Response[Any | ToolInvocationRecord]:
     return Response(
         status_code=HTTPStatus(response.status_code),
         content=response.content,
@@ -61,24 +63,29 @@ def _build_response(
 
 
 def sync_detailed(
+    id: UUID,
     *,
     client: AuthenticatedClient | Client,
-) -> Response[Problem | SalesInquiryChallengeResponse200]:
-    """Prepare an anonymous website sales inquiry
+) -> Response[Any | ToolInvocationRecord]:
+    """Read an account-owned invocation receipt and sanitized result
 
-     Requires the default-off sales intake flag. This opaque one-hour form token must be at least two
-    seconds old when submitted. The challenge and submission share a separate ten-requests-per-minute IP
-    budget.
+     Requires an unscoped personal-account connection with deploy-write permission. Runtime results are
+    not disclosed by registry-read permission. This read never dispatches work.
+
+    Args:
+        id (UUID):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Problem | SalesInquiryChallengeResponse200]
+        Response[Any | ToolInvocationRecord]
     """
 
-    kwargs = _get_kwargs()
+    kwargs = _get_kwargs(
+        id=id,
+    )
 
     response = client.get_httpx_client().request(
         **kwargs,
@@ -88,47 +95,56 @@ def sync_detailed(
 
 
 def sync(
+    id: UUID,
     *,
     client: AuthenticatedClient | Client,
-) -> Problem | SalesInquiryChallengeResponse200 | None:
-    """Prepare an anonymous website sales inquiry
+) -> Any | ToolInvocationRecord | None:
+    """Read an account-owned invocation receipt and sanitized result
 
-     Requires the default-off sales intake flag. This opaque one-hour form token must be at least two
-    seconds old when submitted. The challenge and submission share a separate ten-requests-per-minute IP
-    budget.
+     Requires an unscoped personal-account connection with deploy-write permission. Runtime results are
+    not disclosed by registry-read permission. This read never dispatches work.
+
+    Args:
+        id (UUID):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Problem | SalesInquiryChallengeResponse200
+        Any | ToolInvocationRecord
     """
 
     return sync_detailed(
+        id=id,
         client=client,
     ).parsed
 
 
 async def asyncio_detailed(
+    id: UUID,
     *,
     client: AuthenticatedClient | Client,
-) -> Response[Problem | SalesInquiryChallengeResponse200]:
-    """Prepare an anonymous website sales inquiry
+) -> Response[Any | ToolInvocationRecord]:
+    """Read an account-owned invocation receipt and sanitized result
 
-     Requires the default-off sales intake flag. This opaque one-hour form token must be at least two
-    seconds old when submitted. The challenge and submission share a separate ten-requests-per-minute IP
-    budget.
+     Requires an unscoped personal-account connection with deploy-write permission. Runtime results are
+    not disclosed by registry-read permission. This read never dispatches work.
+
+    Args:
+        id (UUID):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Response[Problem | SalesInquiryChallengeResponse200]
+        Response[Any | ToolInvocationRecord]
     """
 
-    kwargs = _get_kwargs()
+    kwargs = _get_kwargs(
+        id=id,
+    )
 
     response = await client.get_async_httpx_client().request(**kwargs)
 
@@ -136,25 +152,29 @@ async def asyncio_detailed(
 
 
 async def asyncio(
+    id: UUID,
     *,
     client: AuthenticatedClient | Client,
-) -> Problem | SalesInquiryChallengeResponse200 | None:
-    """Prepare an anonymous website sales inquiry
+) -> Any | ToolInvocationRecord | None:
+    """Read an account-owned invocation receipt and sanitized result
 
-     Requires the default-off sales intake flag. This opaque one-hour form token must be at least two
-    seconds old when submitted. The challenge and submission share a separate ten-requests-per-minute IP
-    budget.
+     Requires an unscoped personal-account connection with deploy-write permission. Runtime results are
+    not disclosed by registry-read permission. This read never dispatches work.
+
+    Args:
+        id (UUID):
 
     Raises:
         errors.UnexpectedStatus: If the server returns an undocumented status code and Client.raise_on_unexpected_status is True.
         httpx.TimeoutException: If the request takes longer than Client.timeout.
 
     Returns:
-        Problem | SalesInquiryChallengeResponse200
+        Any | ToolInvocationRecord
     """
 
     return (
         await asyncio_detailed(
+            id=id,
             client=client,
         )
     ).parsed

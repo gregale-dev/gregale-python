@@ -6,38 +6,27 @@ from typing import Any, TypeVar
 from attrs import define as _attrs_define
 from attrs import field as _attrs_field
 
-T = TypeVar("T", bound="SelectReferralCodeResponse200")
+T = TypeVar("T", bound="ChangeToolInvocationBodyType0")
 
 
 @_attrs_define
-class SelectReferralCodeResponse200:
-    accepted: bool
+class ChangeToolInvocationBodyType0:
     additional_properties: dict[str, Any] = _attrs_field(init=False, factory=dict)
 
     def to_dict(self) -> dict[str, Any]:
-        accepted = self.accepted
 
         field_dict: dict[str, Any] = {}
         field_dict.update(self.additional_properties)
-        field_dict.update(
-            {
-                "accepted": accepted,
-            }
-        )
 
         return field_dict
 
     @classmethod
     def from_dict(cls: type[T], src_dict: Mapping[str, Any]) -> T:
         d = dict(src_dict)
-        accepted = d.pop("accepted")
+        change_tool_invocation_body_type_0 = cls()
 
-        select_referral_code_response_200 = cls(
-            accepted=accepted,
-        )
-
-        select_referral_code_response_200.additional_properties = d
-        return select_referral_code_response_200
+        change_tool_invocation_body_type_0.additional_properties = d
+        return change_tool_invocation_body_type_0
 
     @property
     def additional_keys(self) -> list[str]:
